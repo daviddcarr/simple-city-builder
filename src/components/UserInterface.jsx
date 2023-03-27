@@ -1,4 +1,6 @@
-import { useRef } from 'react'
+import {
+    useState
+} from 'react'
 import { 
     Canvas,
     useFrame,
@@ -11,28 +13,73 @@ import {
 
 function UserInterface({ blockList, currentBlock, setCurrentBlock }) {
 
-    const [playerCurrency, playerMode, togglePlayerMode] = useGame(state => [state.playerCurrency, state.playerMode, state.togglePlayerMode])
+    const [
+        playerCurrency,
+        playerMode,
+        togglePlayerMode
+    ] = useGame(state => [
+        state.playerCurrency,
+        state.playerMode,
+        state.togglePlayerMode
+    ])
+
+    const [showToolBar, setShowToolBar] = useState(false)
+
+    const mobileClasses = [
+        "absolute",
+        "grid",
+        "grid-cols-3",
+        "xs:grid-cols-4",
+        "sm:grid-cols-5",
+        "p-3",
+        "bottom-0",
+        "w-full",
+        "flex",
+        "gap-3",
+        "items-center",
+        "justify-start",
+    ]
+    const desktopClasses = [
+        "md:absolute",
+        "md:flex",
+        "md:flex-wrap",
+        "md:items-center",
+        "md:justify-center",
+    ]
+
+    const buttonMobileClasses = [
+        "border-2",
+        "relative",
+        "rounded-lg",
+        "w-full",
+        "aspect-square",
+    ]
+    const buttonDesktopClasses = [
+        "md:w-28",
+        "md:h-28",
+    ]
+
 
     return (
         <div className="absolute inset-0 w-full h-screen pointer-events-none z-10">
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 space-x-4 p-4 flex items-center">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 space-x-4 p-4 flex items-center">
                 <span className="text-white text-2xl font-bold">
                     ${playerCurrency}
                 </span>
                 <button
-                    className='pointer-events-auto bg-gray-800 hover:bg-red-600 text-white font-bold py-2 px-4 rounded'
+                    className='pointer-events-auto bg-gray-800 hover:bg-red-600 text-white font-bold py-2 px-4 rounded w-max uppercase'
                     onClick={togglePlayerMode}
                     >
                     {playerMode} Mode
                 </button>
             </div>
-            <div className="block-list ml-3 absolute left-0 top-1/2 -translate-y-1/2 flex flex-col items-start space-y-3 ">
+            <div className={`block-list ${mobileClasses.join(" ")} ${desktopClasses.join(" ")}`}>
 
-                {blockList.map((block, index) => {
+                { playerMode === "build" && ( blockList.map((block, index) => {
                     return (
                     <div 
                         key={index}
-                        className={`w-28 h-28 h- border-2 rounded-lg relative ${currentBlock === block ? "border-blue-500" : "border-white"}`}
+                        className={`${buttonMobileClasses.join(" ")} ${buttonDesktopClasses.join(" ")} ${currentBlock === block ? "border-blue-500" : "border-white"}`}
                         onClick={() => setCurrentBlock(block)}>
                         <Canvas
                         className="h-full w-full"
@@ -54,7 +101,7 @@ function UserInterface({ blockList, currentBlock, setCurrentBlock }) {
                         </div>
                     </div>
                     )
-                })}
+                }))}
 
             </div>
         </div>
