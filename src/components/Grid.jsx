@@ -1,8 +1,23 @@
 import { useState } from 'react'
 import * as THREE from 'three'
 import { useLoader } from '@react-three/fiber'
+import { useGame } from '../hooks/useGame'
+import { getBlockCost } from './Blocks'
 
 export default function Grid(props) {
+
+    const [
+      playerMode,
+      playerCurrency,
+      setPlayerCurrency
+    ] = useGame(state => [
+      state.playerMode,
+      state.playerCurrency,
+      state.setPlayerCurrency
+    ])
+
+    const currentBlock = props.currentBlock
+    const canPurchaseBlock = playerCurrency >= getBlockCost(currentBlock)
 
     const texture = useLoader(THREE.TextureLoader, '/images/grass_texture.png')
     texture.wrapS = THREE.RepeatWrapping
@@ -32,7 +47,7 @@ export default function Grid(props) {
           props.hoveringFunction(true)
         }}
         onPointerMove={(e) => {
-          if ( e.intersections ) {
+          if ( e.intersections && canPurchaseBlock ) {
             for ( let i = 0; i < e.intersections.length; i++ ) {
               if ( e.intersections[i].object.name === "Grid" ) {
                 const point = e.intersections[i].point
@@ -46,18 +61,17 @@ export default function Grid(props) {
         }}
         onPointerDown={(e) => {
             e.stopPropagation()
-            if ( e.intersections ) {
+            if ( e.intersections && playerMode === "build" && canPurchaseBlock ) {
               for ( let i = 0; i < e.intersections.length; i++ ) {
                 if ( e.intersections[i].object.name === "Grid" ) {
                     const point = e.intersections[i].point
                     const adjacentBlocks = props.checkAdjacentBlocks(Math.round(point.x), Math.round(point.z))
-                    console.log(adjacentBlocks)
                     if ( firstBlockPlaced && containsBlock(adjacentBlocks) ) {
-                        console.log("Adjacent Block")
                         props.placeBlock(Math.round(point.x), Math.round(point.z))
+                        setPlayerCurrency(playerCurrency - getBlockCost(currentBlock))
                     } else if ( ! firstBlockPlaced ) {
-                        console.log("First Block")
                         props.placeBlock(Math.round(point.x), Math.round(point.z))
+                        setPlayerCurrency(playerCurrency - getBlockCost(currentBlock))
                         setFirstBlockPlaced(true)
                     }
                 }

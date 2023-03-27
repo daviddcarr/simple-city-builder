@@ -15,8 +15,7 @@ import {
 import Grid from './components/Grid'
 import { 
   PlacingBlock,
-  Highrise,
-  Highway
+  RenderBlock
  } from './components/Blocks'
 
 import {
@@ -28,42 +27,38 @@ import {
 import { useGame } from './hooks/useGame'
 
 import { useControls } from 'leva'
-import BlockList from './components/BlockList';
+import UserInterface from './components/UserInterface';
 
 
 const enableEffects = false
 
 function App() {
 
-  const [playerBlocks, setPlayerBlocks] = useGame(state => [state.playerBlocks, state.setPlayerBlocks])
+    // Generate a random list of blocks to place
+  const availableBlocks = [
+    "highrise",
+    "highway",
+    "highway2",
+    "highway3",
+    "factory",
+  ]
+  
+  const [
+    gridSize, 
+    playerMode, 
+    playerBlocks, 
+    setPlayerBlocks, 
+  ] = useGame(state => [
+    state.gridSize, 
+    state.playerMode, 
+    state.playerBlocks, 
+    state.setPlayerBlocks,
+  ])
 
-  const gridSize = 100
   const [pointerPosition, setPointerPosition] = useState([0, 0, 0])
   const [hovering, setHovering] = useState(false)
   const [blockRotation, setBlockRotation] = useState(0)
-  
-  // Generate a random list of blocks to place
-  const availableBlocks = [
-    "highrise",
-    "highway"
-  ]
-  const [blockList, setBlockList] = useState(() => {
-    const arrayLength = gridSize ** 2
-    const newArray = new Array(arrayLength)
-    for (let i = 0; i < arrayLength; i++) {
-      newArray[i] = availableBlocks[Math.floor(Math.random() * availableBlocks.length)]
-    }
-    return newArray
-  })
-  const [currentBlock, setCurrentBlock] = useState(blockList[0])
-  const [upcomingBlocks, setUpcomingBlocks] = useState(() => {
-    return blockList.slice(1, 6);
-  });
-
-  useEffect(() => {
-    setUpcomingBlocks(blockList.slice(1, 5));
-  }, [blockList]);
-
+  const [currentBlock, setCurrentBlock] = useState("highrise")
   
   function placeBlock(x, z) {
     const xIndex = x + (gridSize/2)
@@ -75,19 +70,15 @@ function App() {
     if ( xIndex >= 0 && xIndex < gridSize && zIndex >= 0 && zIndex < gridSize ) {
       console.log("Placing Block")
       const newGrid = [...playerBlocks]
+      const incomeResetTime = new Date()
+
       newGrid[xIndex][zIndex] = {
         block: currentBlock,
         x: x,
         z: z,
-        blockRotation: blockRotation
+        blockRotation: blockRotation,
+        incomeResetTime: incomeResetTime
       }
-
-      const newBlockList = [...blockList]
-      newBlockList.shift()
-      setBlockList(newBlockList)
-      setCurrentBlock(newBlockList[0])
-
-      console.log(newGrid)
 
       setPlayerBlocks(newGrid)
     }
@@ -131,15 +122,13 @@ function App() {
   }, [])
 
 
-  // LEVA PROPS
-  // const controlProps = useControls('Controls', {
-  //   effectsEnable: { value: false, onChange: (value) => !value },
-  // })
-
-
   return (
     <>
-      <BlockList blockList={upcomingBlocks} currentBlock={currentBlock} />
+      <UserInterface
+        blockList={[...availableBlocks]}
+        currentBlock={currentBlock}
+        setCurrentBlock={setCurrentBlock}
+        />
       <div className="app">
         <Canvas
           camera={{ position: [0, 10, 10], fov: 50 }}
@@ -168,25 +157,21 @@ function App() {
           {playerBlocks.map((row, x) => {
             return row.map((block, z) => {
               if (block) {
-                switch (block.block) {
-                  case "highrise":
-                    return <Highrise key={`${x}-${z}`} position={[block.x, 0, block.z]} rotation-y={block.blockRotation} height={2} />
-                  case "highway":
-                    return <Highway key={`${x}-${z}`} position={[block.x, 0, block.z]} rotation-y={block.blockRotation} />
-                  default:
-                    return <PlacingBlock key={`${x}-${z}`} position={[block.x, 0, block.z]} blockRotation={block.blockRotation} hovering />
-                }
+                return <RenderBlock 
+                    key={x + "-" + z}
+                    block={block}
+                    />
               }
               return null
             })
           })}
           
-          <PlacingBlock 
+          { playerMode === "build" && <PlacingBlock 
             position={pointerPosition} 
             hovering={hovering}
             blockRotation={blockRotation}
             currentBlock={currentBlock}
-            />
+            />}
           
 
           <Grid 
@@ -197,6 +182,7 @@ function App() {
             hoveringFunction={setHovering}
             checkAdjacentBlocks={checkAdjacentBlocks}
             placeBlock={placeBlock}
+            currentBlock={currentBlock}
             />
           <OrbitControls
             makeDefault

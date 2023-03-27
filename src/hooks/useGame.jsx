@@ -16,8 +16,11 @@ export const useGame = create((set) => {
     const gridSize = 100
 
     return {
+        gridSize: gridSize,
+
         playerMode: 'idle',
         setPlayerMode: (mode) => set({ playerMode: mode }),
+        togglePlayerMode: () => set((prev) => ({ playerMode: prev.playerMode === 'idle' ? 'build' : 'idle' })),
 
         playerCurrency: getLocalStorage('playerCurrency') || 100,
         setPlayerCurrency: (currency) => set({ playerCurrency: currency }),
