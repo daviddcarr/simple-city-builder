@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@next/font": "^13.2.4",
     "@react-spring/three": "^9.7.1",
     "@react-three/drei": "^9.57.3",
     "@react-three/postprocessing": "^2.7.0",

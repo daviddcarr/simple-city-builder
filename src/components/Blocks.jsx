@@ -1,8 +1,16 @@
-//import { useRef } from 'react'
-import { useFrame } from 'react-three-fiber'
+import { useState } from 'react'
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
+import {
+    useFrame,
+    extend,
+} from 'react-three-fiber'
+import {
+    Html
+} from '@react-three/drei'
 import { useSpring, a } from '@react-spring/three'
 import { useGame } from '../hooks/useGame'
 
+extend({ TextGeometry })
 
 export function PlacingBlock(props) {
 
@@ -43,7 +51,7 @@ export function RenderBlock({block, yOffset}) {
             case "highway3":
                 return <Highway sides={4} position={blockPosition} rotation-y={block.blockRotation} />
             case "factory":
-                return <Factory position={blockPosition} rotation-y={block.blockRotation} />
+                return <Factory position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
             default:
                 return <PlacingBlock position={blockPosition} blockRotation={block.blockRotation} hovering />
         }
@@ -82,6 +90,8 @@ const BlockWrapper = (props) => {
         state.playerBlocks,
     ])
 
+    const [dollarSignVisible, setDollarSignVisible] = useState(false)
+
     const currencyPerPeriod = props.currencyPerPeriod ? props.currencyPerPeriod : 5
     const currencyPeriod = props.currencyPeriod ? props.currencyPeriod : 30
 
@@ -101,6 +111,12 @@ const BlockWrapper = (props) => {
                     const zIndex = props.position[2] + (gridSize/2)
 
                      playerBlocks[xIndex][zIndex].incomeResetTime = currentTime
+
+                     // Show dollar sign animation and hide it after 2 seconds
+                    setDollarSignVisible(true)
+                    setTimeout(() => {
+                        setDollarSignVisible(false);
+                    }, 2000)
                 }            
             }
         }
@@ -111,6 +127,7 @@ const BlockWrapper = (props) => {
             {...props}
             >
             {props.children}
+            <DollarSign isVisible={dollarSignVisible} />
         </group>
     )
 }   
@@ -229,3 +246,23 @@ export function Factory(props) {
             </BlockWrapper>
         )
 }
+
+function DollarSign({ isVisible }) {
+    const animationProps = useSpring({
+      opacity: isVisible ? 1 : 0,
+      y: isVisible ? 1.5 : 1,
+      config: { tension: 120, friction: 14 },
+    });
+
+    return (
+      <a.group position-y={animationProps.y} visible={isVisible}>
+        <Html scaleFactor={20} center>
+            <span
+                className={`font-3xl text-green-500 font-bold  ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+            >
+                $
+            </span>
+        </Html>
+      </a.group>
+    );
+  }

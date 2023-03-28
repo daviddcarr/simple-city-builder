@@ -1,7 +1,6 @@
 import './App.css';
 
 import React, { 
-  useRef,
   useState,
   useEffect
 } from 'react'
@@ -21,12 +20,11 @@ import {
 import {
   EffectComposer,
   DepthOfField,
-  Bloom
 } from '@react-three/postprocessing'
 
 import { useGame } from './hooks/useGame'
 
-import { useControls } from 'leva'
+// import { useControls } from 'leva'
 import UserInterface from './components/UserInterface';
 
 
