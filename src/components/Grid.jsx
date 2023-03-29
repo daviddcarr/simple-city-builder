@@ -42,7 +42,7 @@ export default function Grid(props) {
         {...props}
         position={[props.position[0] - 0.5, props.position[1], props.position[2] - 0.5]}
         name="Grid"
-
+        receiveShadow
         onPointerOver= {(e) => {
           props.hoveringFunction(true)
         }}

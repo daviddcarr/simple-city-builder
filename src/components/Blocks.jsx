@@ -144,7 +144,7 @@ export function Highrise(props) {
             >
             <mesh
                 position={[0, height / 2, 0]}
-            
+                castShadow
                 >
                 <boxGeometry 
                     args={[0.8, height, 0.8]} 
@@ -219,12 +219,14 @@ export function Factory(props) {
 
                 <mesh
                     position={[0.4, 0.5, 0.15]}
+                    castShadow
                     >
                     <cylinderGeometry args={[0.05, 0.08, 1, 10]} />
                     <meshStandardMaterial color="red" />
                 </mesh>
                 <mesh
                     position={[0.4, 0.5, -0.15]}
+                    castShadow
                     >
                     <cylinderGeometry args={[0.05, 0.08, 1, 10]} />
                     <meshStandardMaterial color="red" />
@@ -232,6 +234,7 @@ export function Factory(props) {
 
                 <mesh
                     position={[0, 0.25, 0]}
+                    castShadow
                     >
                     <boxGeometry args={[0.75, 0.5, 0.75]} />
                     <meshStandardMaterial color="orange" />

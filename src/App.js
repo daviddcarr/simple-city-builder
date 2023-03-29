@@ -130,12 +130,18 @@ function App() {
       <div className="app">
         <Canvas
           camera={{ position: [0, 10, 10], fov: 50 }}
+          shadows={true}
           >
           <Sky 
             distance={450000}
             sunPosition={[0, 1, 0]}
             inclination={0}
             azimuth={0.25}
+            />
+          <directionalLight
+            position={[10, 10, 10]}
+            intensity={1}
+            castShadow
             />
           <Environment 
             preset="park" 
