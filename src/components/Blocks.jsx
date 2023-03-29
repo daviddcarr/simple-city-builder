@@ -127,7 +127,7 @@ const BlockWrapper = (props) => {
             {...props}
             >
             {props.children}
-            <DollarSign isVisible={dollarSignVisible} />
+            <DollarSign isVisible={dollarSignVisible} amount={ currencyPerPeriod } />
         </group>
     )
 }   
@@ -247,7 +247,7 @@ export function Factory(props) {
         )
 }
 
-function DollarSign({ isVisible }) {
+function DollarSign({ isVisible, amount }) {
     const animationProps = useSpring({
       opacity: isVisible ? 1 : 0,
       y: isVisible ? 1.5 : 1,
@@ -260,7 +260,7 @@ function DollarSign({ isVisible }) {
             <span
                 className={`font-3xl text-green-500 font-bold  ${isVisible ? 'opacity-100' : 'opacity-0'}`}
             >
-                $
+                ${amount}
             </span>
         </Html>
       </a.group>
