@@ -25,21 +25,13 @@ import {
 import { useGame } from './hooks/useGame'
 
 // import { useControls } from 'leva'
-import UserInterface from './components/UserInterface';
+import UserInterface from './components/UserInterface'
 
+import { buildingColors } from './constants/colors'
 
 const enableEffects = false
 
 function App() {
-
-    // Generate a random list of blocks to place
-  const availableBlocks = [
-    "highrise",
-    "highway",
-    "highway2",
-    "highway3",
-    "factory",
-  ]
   
   const [
     gridSize, 
@@ -56,7 +48,13 @@ function App() {
   const [pointerPosition, setPointerPosition] = useState([0, 0, 0])
   const [hovering, setHovering] = useState(false)
   const [blockRotation, setBlockRotation] = useState(0)
-  const [currentBlock, setCurrentBlock] = useState("highrise")
+  const [currentBlock, setCurrentBlock] = useState({
+    name: "highrise",
+    settings: {
+      height: (Math.random() * 4) + 1,
+      color: buildingColors[Math.floor(Math.random() * buildingColors.length)]
+    }
+  })
   
   function placeBlock(x, z) {
     const xIndex = x + (gridSize/2)
@@ -71,7 +69,8 @@ function App() {
       const incomeResetTime = new Date()
 
       newGrid[xIndex][zIndex] = {
-        block: currentBlock,
+        block: currentBlock.name,
+        settings: currentBlock.settings,
         x: x,
         z: z,
         blockRotation: blockRotation,
@@ -123,8 +122,7 @@ function App() {
   return (
     <>
       <UserInterface
-        blockList={[...availableBlocks]}
-        currentBlock={currentBlock}
+        currentBlock={currentBlock.name}
         setCurrentBlock={setCurrentBlock}
         />
       <div className="app">
@@ -142,6 +140,10 @@ function App() {
             position={[10, 10, 10]}
             intensity={1}
             castShadow
+            shadow-camera-top={20}
+            shadow-camera-right={20}
+            shadow-camera-bottom={-20}
+            shadow-camera-left={-20}
             />
           <Environment 
             preset="park" 
@@ -164,6 +166,7 @@ function App() {
                 return <RenderBlock 
                     key={x + "-" + z}
                     block={block}
+                    useDefault={false}
                     />
               }
               return null
@@ -186,7 +189,7 @@ function App() {
             hoveringFunction={setHovering}
             checkAdjacentBlocks={checkAdjacentBlocks}
             placeBlock={placeBlock}
-            currentBlock={currentBlock}
+            currentBlock={currentBlock.name}
             />
           <OrbitControls
             makeDefault

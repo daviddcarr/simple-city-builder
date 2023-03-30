@@ -2,7 +2,7 @@ import { useState } from 'react'
 import * as THREE from 'three'
 import { useLoader } from '@react-three/fiber'
 import { useGame } from '../hooks/useGame'
-import { getBlockCost } from './Blocks'
+import { getBlock } from '../constants/blocks'
 
 export default function Grid(props) {
 
@@ -17,7 +17,7 @@ export default function Grid(props) {
     ])
 
     const currentBlock = props.currentBlock
-    const canPurchaseBlock = playerCurrency >= getBlockCost(currentBlock)
+    const canPurchaseBlock = playerCurrency >= getBlock(currentBlock).cost
 
     const texture = useLoader(THREE.TextureLoader, '/images/grass_texture.png')
     texture.wrapS = THREE.RepeatWrapping
@@ -68,10 +68,10 @@ export default function Grid(props) {
                     const adjacentBlocks = props.checkAdjacentBlocks(Math.round(point.x), Math.round(point.z))
                     if ( firstBlockPlaced && containsBlock(adjacentBlocks) ) {
                         props.placeBlock(Math.round(point.x), Math.round(point.z))
-                        setPlayerCurrency(playerCurrency - getBlockCost(currentBlock))
+                        setPlayerCurrency(playerCurrency - getBlock(currentBlock).cost)
                     } else if ( ! firstBlockPlaced ) {
                         props.placeBlock(Math.round(point.x), Math.round(point.z))
-                        setPlayerCurrency(playerCurrency - getBlockCost(currentBlock))
+                        setPlayerCurrency(playerCurrency - getBlock(currentBlock).cost)
                         setFirstBlockPlaced(true)
                     }
                 }

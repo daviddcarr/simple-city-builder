@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import {
     useFrame,
@@ -9,6 +9,8 @@ import {
 } from '@react-three/drei'
 import { useSpring, a } from '@react-spring/three'
 import { useGame } from '../hooks/useGame'
+
+import { getBlock } from '../constants/blocks'
 
 extend({ TextGeometry })
 
@@ -24,7 +26,7 @@ export function PlacingBlock(props) {
             {...props}
             rotation-y={rotationY}
             >
-            <RenderBlock block={{block: currentBlock, x: 0, z: 0}} />
+            <RenderBlock block={{block: currentBlock.name, x: 0, z: 0, settings: currentBlock.settings}} />
         </a.group>
     )
   }
@@ -43,15 +45,17 @@ export function RenderBlock({block, yOffset}) {
     if (block) {
         switch (block.block) {
             case "highrise":
-                return <Highrise position={blockPosition} rotation-y={block.blockRotation} height={2} incomeResetTime={block.incomeResetTime} />
-            case "highway":
-                return <Highway position={blockPosition} rotation-y={block.blockRotation} />
-            case "highway2":
-                return <Highway sides={3} position={blockPosition} rotation-y={block.blockRotation} />
-            case "highway3":
-                return <Highway sides={4} position={blockPosition} rotation-y={block.blockRotation} />
+                return <Highrise position={blockPosition} rotation-y={block.blockRotation} settings={block.settings} incomeResetTime={block.incomeResetTime} />
+            case "park":
+                return <Park position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
             case "factory":
                 return <Factory position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
+            case "highway":
+                return <Highway position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
+            case "highway2":
+                return <Highway sides={3} position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
+            case "highway3":
+                return <Highway sides={4} position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
             default:
                 return <PlacingBlock position={blockPosition} blockRotation={block.blockRotation} hovering />
         }
@@ -59,68 +63,61 @@ export function RenderBlock({block, yOffset}) {
       return null
 }
 
-export const getBlockCost = (block) => {
-    switch (block) {
-      case "highrise":
-        return 50
-      case "highway":
-        return 5
-      case "highway2":
-        return 10
-      case "highway3":
-        return 15
-      case "factory":
-        return 150
-      default:
-        return 0
-    }
-}
-
 const BlockWrapper = (props) => {
 
     const [
         gridSize,
-        playerCurrency,
-        setPlayerCurrency,
+        addPlayerCurrency,
         playerBlocks,
     ] = useGame(state => [
         state.gridSize,
-        state.playerCurrency,
-        state.setPlayerCurrency,
+        state.addPlayerCurrency,
         state.playerBlocks,
     ])
 
     const [dollarSignVisible, setDollarSignVisible] = useState(false)
+    const [incomeResetTime, setIncomeResetTime] = useState(props.incomeResetTime)
+    const incomeTimerRef = useRef()
 
-    const currencyPerPeriod = props.currencyPerPeriod ? props.currencyPerPeriod : 5
-    const currencyPeriod = props.currencyPeriod ? props.currencyPeriod : 30
+    const currencyPerPeriod = props.currencyPerPeriod || 5
+    const currencyPeriod = props.currencyPeriod || 30
 
-    useFrame(() => {
-        if (props.incomeResetTime) {
-            if (props.incomeResetTime < Date.now()) {
-                // calculate how much time has passed since props.incomeResetTime
-                const currentTime = Date.now()
-                const timePassed = Math.floor((currentTime - props.incomeResetTime) / 1000)
+    const updateIncome = () => {
+        addPlayerCurrency(currencyPerPeriod)
 
-                // if more than 30 seconds have passed, add 5 currency to the player
-                if (timePassed > currencyPeriod) {
-                    console.log("Time passed: " + timePassed)
-                    setPlayerCurrency(playerCurrency + currencyPerPeriod)
+        const xIndex = props.position[0] + (gridSize/2)
+        const zIndex = props.position[2] + (gridSize/2)
 
-                    const xIndex = props.position[0] + (gridSize/2)
-                    const zIndex = props.position[2] + (gridSize/2)
+        const newIncomeResetTime = Date.now()
+        playerBlocks[xIndex][zIndex].incomeResetTime = newIncomeResetTime
+        setIncomeResetTime(new Date(newIncomeResetTime).toISOString())
 
-                     playerBlocks[xIndex][zIndex].incomeResetTime = currentTime
+        // Show dollar sign animation and hide it after 2 seconds
+        setDollarSignVisible(true)
+        setTimeout(() => {
+            setDollarSignVisible(false);
+        }, 2000)
+    }
 
-                     // Show dollar sign animation and hide it after 2 seconds
-                    setDollarSignVisible(true)
-                    setTimeout(() => {
-                        setDollarSignVisible(false);
-                    }, 2000)
-                }            
+    useEffect(() => {
+
+        if (incomeResetTime) {
+            const parsedIncomeResetTime = Date.parse(incomeResetTime)
+            const timeToNextIncome = parsedIncomeResetTime + (currencyPeriod * 1000) - Date.now()
+
+            if (timeToNextIncome > 0) {
+                console.log("start timer")
+                incomeTimerRef.current = setTimeout(() => {
+                    updateIncome()
+                }, timeToNextIncome)
             }
         }
-    })
+
+        return () => {
+            clearTimeout(incomeTimerRef.current)
+        }
+
+    }, [incomeResetTime])
 
     return (
         <group
@@ -134,13 +131,16 @@ const BlockWrapper = (props) => {
 
 export function Highrise(props) {
 
-    const height = props.height ? props.height : 1
+    const height = props.settings && props.settings.height ? props.settings.height : 1
+    const color = props.settings && props.settings.color ? props.settings.color : "lightblue"
+
+    const { currencyPerPeriod, currencyPeriod } = getBlock('highrise')
 
     return (
         <BlockWrapper
             {...props}
-            currencyPerPeriod={25}
-            currencyPeriod={30}
+            currencyPerPeriod={currencyPerPeriod}
+            currencyPeriod={currencyPeriod}
             >
             <mesh
                 position={[0, height / 2, 0]}
@@ -149,7 +149,7 @@ export function Highrise(props) {
                 <boxGeometry 
                     args={[0.8, height, 0.8]} 
                     />
-                <meshStandardMaterial color="lightblue" />
+                <meshStandardMaterial color={color}/>
             </mesh>
 
             <mesh
@@ -166,11 +166,14 @@ export function Highway(props) {
 
     const sides = props.sides ? props.sides : 2
 
-    return (
-        <group
-            {...props}
-            >
+    const { currencyPerPeriod, currencyPeriod } = getBlock('highway')
 
+    return (
+        <BlockWrapper
+            {...props}
+            currencyPerPeriod={currencyPerPeriod}
+            currencyPeriod={currencyPeriod}
+            >
             { sides >= 3 && 
                 <mesh
                     position={[0.375, 0.15, 0]}
@@ -204,17 +207,19 @@ export function Highway(props) {
                 <boxGeometry args={[1, 0.1, 1]} />
                 <meshStandardMaterial color="darkgray" />
             </mesh>
-        </group>
+        </BlockWrapper>
     )
 }
 
 export function Factory(props) {
+
+    const { currencyPerPeriod, currencyPeriod } = getBlock('factory')
     
         return (
             <BlockWrapper
                 {...props}
-                currencyPerPeriod={10}
-                currencyPeriod={15}
+                currencyPerPeriod={currencyPerPeriod}
+                currencyPeriod={currencyPeriod}
                 >
 
                 <mesh
@@ -250,6 +255,26 @@ export function Factory(props) {
         )
 }
 
+export function Park(props) {
+
+    const { currencyPerPeriod, currencyPeriod } = getBlock('park')
+
+    return (
+        <BlockWrapper
+            {...props}
+            currencyPerPeriod={currencyPerPeriod}
+            currencyPeriod={currencyPeriod}
+            >
+            <mesh
+                position={[0, 0.05, 0]}
+                >
+                <boxGeometry args={[1, 0.1, 1]} />
+                <meshStandardMaterial color="darkgreen" />
+            </mesh>
+        </BlockWrapper>
+    )
+}
+
 function DollarSign({ isVisible, amount }) {
     const animationProps = useSpring({
       opacity: isVisible ? 1 : 0,
@@ -261,7 +286,7 @@ function DollarSign({ isVisible, amount }) {
       <a.group position-y={animationProps.y} visible={isVisible}>
         <Html scaleFactor={20} center>
             <span
-                className={`font-3xl text-green-500 font-bold  ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+                className={`font-3xl ${amount > 0 ? 'text-green-500' : 'text-red-500'} font-bold  ${isVisible ? 'opacity-100' : 'opacity-0'}`}
             >
                 ${amount}
             </span>
@@ -269,3 +294,6 @@ function DollarSign({ isVisible, amount }) {
       </a.group>
     );
   }
+
+
+// 1680215739166 + ( 30 * 1000 ) - 1680215771474

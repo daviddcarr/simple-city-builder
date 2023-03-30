@@ -24,6 +24,7 @@ export const useGame = create((set) => {
 
         playerCurrency: getLocalStorage('playerCurrency') || 100,
         setPlayerCurrency: (currency) => set({ playerCurrency: currency }),
+        addPlayerCurrency: (amount) => set((prev) => ({ playerCurrency: prev.playerCurrency + amount })),
 
         playerBlocks: getLocalStorage('playerBlocks') || createEmptyGrid(gridSize),
         setPlayerBlocks: (blocks) => set({ playerBlocks: blocks }),

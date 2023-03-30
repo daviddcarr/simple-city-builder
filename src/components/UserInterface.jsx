@@ -3,18 +3,19 @@ import {
 } from 'react'
 import { 
     Canvas,
-    useFrame,
 } from 'react-three-fiber'
 import { useGame } from '../hooks/useGame'
 import { 
     RenderBlock,
-    getBlockCost
 } from './Blocks'
 import {
     TbInfoHexagon
 } from 'react-icons/tb'
 
-function UserInterface({ blockList, currentBlock, setCurrentBlock }) {
+import { buildingColors } from '../constants/colors'
+import { blocks } from '../constants/blocks'
+
+function UserInterface({ currentBlock, setCurrentBlock }) {
 
     const [
         playerCurrency,
@@ -86,7 +87,7 @@ function UserInterface({ blockList, currentBlock, setCurrentBlock }) {
             { showInfo && (
 
                 <div className="absolute  w-full max-w-lg top-[50px] left-1/2 -translate-x-1/2 space-x-4 p-4 flex items-center">
-                    <div className="bg-gray-800 bg-opacity-90 p-4 rounded-lg">
+                    <div className="bg-gray-800 bg-opacity-90 p-4 rounded-lg max-h-[calc(100vh-100px)] overflow-scroll pointer-events-auto">
 
                         <h1 className="text-white text-2xl font-bold mb-4">
                          Welcome to my Super Simple City Builder
@@ -105,7 +106,15 @@ function UserInterface({ blockList, currentBlock, setCurrentBlock }) {
                         </p>
 
                         <p className="text-white text-lg mb-4">
-                            Some buildings earn you money over time. Roads do not.
+                            Some buildings earn or cost you money over time. Hover over a block icon to reavel the cost or income.
+                        </p>
+
+                        <p className="text-white text-lg mb-4">
+                            Note: Clicking the highrise icon will generate a new highrise style.
+                        </p>
+
+                        <p className="text-white text-lg mb-4">
+                            Check out more of my work at <a href="https://daviddylancarr.com" target="_blank" className="text-blue-400 hover:text-blue-200">daviddylancarr.com</a>
                         </p>
 
                     </div>
@@ -116,30 +125,40 @@ function UserInterface({ blockList, currentBlock, setCurrentBlock }) {
 
             <div className={`block-list ${mobileClasses.join(" ")} ${desktopClasses.join(" ")}`}>
 
-                { playerMode === "build" && ( blockList.map((block, index) => {
+                { playerMode === "build" && ( blocks.map((block, index) => {
                     return (
                     <div 
                         key={index}
-                        className={`${buttonMobileClasses.join(" ")} ${buttonDesktopClasses.join(" ")} ${currentBlock === block ? "border-blue-500" : "border-white"}`}
-                        onClick={() => setCurrentBlock(block)}>
+                        className={`group ${buttonMobileClasses.join(" ")} ${buttonDesktopClasses.join(" ")} ${currentBlock === block.name ? "border-blue-500" : "border-white"}`}
+                        onClick={() => setCurrentBlock({
+                            name: block.name,
+                            settings: calculateSettings(block.name)
+                        })}>
                         <Canvas
                         className="h-full w-full"
                         camera={{ position: [0, 2, 3.5], fov: 40 }}
                         >
                             <ambientLight intensity={0.5} />
                             <RenderBlock block={{
-                                    block,
+                                    block: block.name,
                                     x: 0,
                                     z: 0
                                 }} 
-                                yOffset={block === "highrise" ? -1 : 0}
+                                yOffset={0}
                                 />
                         </Canvas>
-                        <div className="absolute bottom-0 left-0 w-full h-8 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                            <span className="text-white text-xl font-bold">
-                                ${getBlockCost(block)}
+                        <div className="absolute bottom-0 left-0 w-full h-6 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+                            <span className="text-white text-md font-bold group-hover:hidden">
+                                {block.title}
+                            </span>
+                            <span className="text-white text-md font-bold hidden group-hover:inline">
+                                ${block.cost}
+                            </span>
+                            <span className={`${block.currencyPerPeriod > 0 ? 'text-green-300' : 'text-red-300' } text-[12px] ml-2 hidden group-hover:inline`}>
+                                ${block.currencyPerPeriod}/{block.currencyPeriod}s
                             </span>
                         </div>
+                       
                     </div>
                     )
                 }))}
@@ -150,3 +169,16 @@ function UserInterface({ blockList, currentBlock, setCurrentBlock }) {
 }
 
 export default UserInterface
+
+function calculateSettings(block) {
+    switch(block) {
+        case "highrise":
+            return {
+                height: (Math.random() * 4) + 1,
+                color: buildingColors[Math.floor(Math.random() * buildingColors.length)]
+            }
+            break
+        default:
+            return {}
+    }
+}
