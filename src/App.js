@@ -2,7 +2,8 @@ import './App.css';
 
 import React, { 
   useState,
-  useEffect
+  useEffect,
+  Suspense
 } from 'react'
 import { Canvas, useFrame } from 'react-three-fiber'
 import { 
@@ -26,6 +27,7 @@ import { useGame } from './hooks/useGame'
 
 // import { useControls } from 'leva'
 import UserInterface from './components/UserInterface'
+import Loading from './components/Loading'
 
 import { buildingColors } from './constants/colors'
 
@@ -121,81 +123,83 @@ function App() {
 
   return (
     <>
-      <UserInterface
-        currentBlock={currentBlock.name}
-        setCurrentBlock={setCurrentBlock}
-        />
-      <div className="app">
-        <Canvas
-          camera={{ position: [0, 10, 10], fov: 50 }}
-          shadows={true}
-          >
-          <Sky 
-            distance={450000}
-            sunPosition={[0, 1, 0]}
-            inclination={0}
-            azimuth={0.25}
-            />
-          <directionalLight
-            position={[10, 10, 10]}
-            intensity={1}
-            castShadow
-            shadow-camera-top={20}
-            shadow-camera-right={20}
-            shadow-camera-bottom={-20}
-            shadow-camera-left={-20}
-            />
-          <Environment 
-            preset="park" 
-            />
-          { enableEffects &&
-            <EffectComposer>
-              <DepthOfField
-                focusDistance={0.01}
-                focalLength={0.03}
-                bokehScale={10}
-                />
-            </EffectComposer>
-          }
-          <fog attach="fog" args={["#ebeff2", 10, 60]} />
+      <Suspense fallback={<Loading />}>
+        <UserInterface
+          currentBlock={currentBlock.name}
+          setCurrentBlock={setCurrentBlock}
+          />
+        <div className="app">
+          <Canvas
+            camera={{ position: [0, 10, 10], fov: 50 }}
+            shadows={true}
+            >
+            <Sky 
+              distance={450000}
+              sunPosition={[0, 1, 0]}
+              inclination={0}
+              azimuth={0.25}
+              />
+            <directionalLight
+              position={[10, 10, 10]}
+              intensity={1}
+              castShadow
+              shadow-camera-top={20}
+              shadow-camera-right={20}
+              shadow-camera-bottom={-20}
+              shadow-camera-left={-20}
+              />
+            <Environment 
+              preset="park" 
+              />
+            { enableEffects &&
+              <EffectComposer>
+                <DepthOfField
+                  focusDistance={0.01}
+                  focalLength={0.03}
+                  bokehScale={10}
+                  />
+              </EffectComposer>
+            }
+            <fog attach="fog" args={["#ebeff2", 10, 60]} />
 
 
-          {playerBlocks.map((row, x) => {
-            return row.map((block, z) => {
-              if (block) {
-                return <RenderBlock 
-                    key={x + "-" + z}
-                    block={block}
-                    useDefault={false}
-                    />
-              }
-              return null
-            })
-          })}
-          
-          { playerMode === "build" && <PlacingBlock 
-            position={pointerPosition} 
-            hovering={hovering}
-            blockRotation={blockRotation}
-            currentBlock={currentBlock}
-            />}
-          
+            {playerBlocks.map((row, x) => {
+              return row.map((block, z) => {
+                if (block) {
+                  return <RenderBlock 
+                      key={x + "-" + z}
+                      block={block}
+                      useDefault={false}
+                      />
+                }
+                return null
+              })
+            })}
+            
+            { playerMode === "build" && <PlacingBlock 
+              position={pointerPosition} 
+              hovering={hovering}
+              blockRotation={blockRotation}
+              currentBlock={currentBlock}
+              />}
+            
 
-          <Grid 
-            gridSize={gridSize}
-            position={[0, 0, 0]}
-            rotation-x={ - Math.PI / 2 }
-            pointerFunction={setPointerPosition}
-            hoveringFunction={setHovering}
-            checkAdjacentBlocks={checkAdjacentBlocks}
-            placeBlock={placeBlock}
-            currentBlock={currentBlock.name}
-            />
-          <OrbitControls
-            makeDefault
-            />
-        </Canvas>
-      </div>
+            <Grid 
+              gridSize={gridSize}
+              position={[0, 0, 0]}
+              rotation-x={ - Math.PI / 2 }
+              pointerFunction={setPointerPosition}
+              hoveringFunction={setHovering}
+              checkAdjacentBlocks={checkAdjacentBlocks}
+              placeBlock={placeBlock}
+              currentBlock={currentBlock.name}
+              />
+            <OrbitControls
+              makeDefault
+              />
+          </Canvas>
+        </div>
+      </Suspense>
     </>
   );
 }
