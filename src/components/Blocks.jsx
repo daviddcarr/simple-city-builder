@@ -12,6 +12,8 @@ import { useGame } from '../hooks/useGame'
 
 import { getBlock } from '../constants/blocks'
 
+import Highrise from './Highrise'
+
 extend({ TextGeometry })
 
 export function PlacingBlock(props) {
@@ -63,7 +65,7 @@ export function RenderBlock({block, yOffset}) {
       return null
 }
 
-const BlockWrapper = (props) => {
+export const BlockWrapper = (props) => {
 
     const [
         gridSize,
@@ -129,38 +131,6 @@ const BlockWrapper = (props) => {
     )
 }   
 
-export function Highrise(props) {
-
-    const height = props.settings && props.settings.height ? props.settings.height : 1
-    const color = props.settings && props.settings.color ? props.settings.color : "lightblue"
-
-    const { currencyPerPeriod, currencyPeriod } = getBlock('highrise')
-
-    return (
-        <BlockWrapper
-            {...props}
-            currencyPerPeriod={currencyPerPeriod}
-            currencyPeriod={currencyPeriod}
-            >
-            <mesh
-                position={[0, height / 2, 0]}
-                castShadow
-                >
-                <boxGeometry 
-                    args={[0.8, height, 0.8]} 
-                    />
-                <meshStandardMaterial color={color}/>
-            </mesh>
-
-            <mesh
-                position={[0, 0.05, 0]}
-                >
-                <boxGeometry args={[1, 0.1, 1]} />
-                <meshStandardMaterial color="darkgray" />
-            </mesh>
-        </BlockWrapper>
-    )
-}
 
 export function Highway(props) {
 
@@ -178,6 +148,8 @@ export function Highway(props) {
                 <mesh
                     position={[0.375, 0.15, 0]}
                     rotation-y={Math.PI / 2}
+                    receiveShadow
+
                     >
                     <boxGeometry args={[0.5, 0.1, 0.25]} />
                     <meshStandardMaterial color="gray" />
@@ -188,6 +160,7 @@ export function Highway(props) {
                 <mesh
                     position={[-0.375, 0.15, 0]}
                     rotation-y={Math.PI / 2}
+                    receiveShadow
                     >
                     <boxGeometry args={[0.5, 0.1, 0.25]} />
                     <meshStandardMaterial color="gray" />
@@ -195,7 +168,8 @@ export function Highway(props) {
             }
 
             <mesh
-                position={[0, 0.15, 0]} 
+                position={[0, 0.15, 0]}
+                receiveShadow
                 >
                 <boxGeometry args={[0.5, 0.1, 1]} />
                 <meshStandardMaterial color="gray" />
@@ -203,6 +177,7 @@ export function Highway(props) {
 
             <mesh
                 position={[0, 0.05, 0]}
+                receiveShadow
                 >
                 <boxGeometry args={[1, 0.1, 1]} />
                 <meshStandardMaterial color="darkgray" />
@@ -225,6 +200,7 @@ export function Factory(props) {
                 <mesh
                     position={[0.4, 0.5, 0.15]}
                     castShadow
+                    receiveShadow
                     >
                     <cylinderGeometry args={[0.05, 0.08, 1, 10]} />
                     <meshStandardMaterial color="red" />
@@ -232,6 +208,7 @@ export function Factory(props) {
                 <mesh
                     position={[0.4, 0.5, -0.15]}
                     castShadow
+                    receiveShadow
                     >
                     <cylinderGeometry args={[0.05, 0.08, 1, 10]} />
                     <meshStandardMaterial color="red" />
@@ -240,6 +217,7 @@ export function Factory(props) {
                 <mesh
                     position={[0, 0.25, 0]}
                     castShadow
+                    receiveShadow
                     >
                     <boxGeometry args={[0.75, 0.5, 0.75]} />
                     <meshStandardMaterial color="orange" />
@@ -247,6 +225,7 @@ export function Factory(props) {
     
                 <mesh
                     position={[0, 0.05, 0]}
+                    receiveShadow
                     >
                     <boxGeometry args={[1, 0.1, 1]} />
                     <meshStandardMaterial color="darkgray" />
@@ -267,6 +246,7 @@ export function Park(props) {
             >
             <mesh
                 position={[0, 0.05, 0]}
+                receiveShadow
                 >
                 <boxGeometry args={[1, 0.1, 1]} />
                 <meshStandardMaterial color="darkgreen" />

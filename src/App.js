@@ -28,6 +28,7 @@ import { useGame } from './hooks/useGame'
 // import { useControls } from 'leva'
 import UserInterface from './components/UserInterface'
 import Loading from './components/Loading'
+import { calculateProceduralHighrise, getRandomHighriseTexture } from './constants/blocks';
 
 import { buildingColors } from './constants/colors'
 
@@ -54,7 +55,8 @@ function App() {
     name: "highrise",
     settings: {
       height: (Math.random() * 4) + 1,
-      color: buildingColors[Math.floor(Math.random() * buildingColors.length)]
+      texture: getRandomHighriseTexture(),
+      floors: calculateProceduralHighrise()
     }
   })
   

@@ -14,6 +14,7 @@ import {
 
 import { buildingColors } from '../constants/colors'
 import { blocks } from '../constants/blocks'
+import { calculateProceduralHighrise, getRandomHighriseTexture } from '../constants/blocks'
 
 function UserInterface({ currentBlock, setCurrentBlock }) {
 
@@ -175,7 +176,8 @@ function calculateSettings(block) {
         case "highrise":
             return {
                 height: (Math.random() * 4) + 1,
-                color: buildingColors[Math.floor(Math.random() * buildingColors.length)]
+                texture: getRandomHighriseTexture(),
+                floors: calculateProceduralHighrise(),
             }
             break
         default:
