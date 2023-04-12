@@ -50,7 +50,7 @@ export function RenderBlock({block, yOffset}) {
             case "highrise":
                 return <Highrise position={blockPosition} rotation-y={block.blockRotation} settings={block.settings} incomeResetTime={block.incomeResetTime} />
             case "park":
-                return <Park position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
+                return <Park position={blockPosition} rotation-y={block.blockRotation} settings={block.settings} incomeResetTime={block.incomeResetTime} />
             case "factory":
                 return <Factory position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
             case "highway":
@@ -346,6 +346,8 @@ export function Park(props) {
 
     const { currencyPerPeriod, currencyPeriod } = getBlock('park')
 
+    const treePosition = props.settings && props.settings.treePosition ? props.settings.treePosition : [0.35, 0.05, 0.35]
+
     const parkFoundation = useGLTF('./glb/foundationGrass.glb')
 
     const parkFoundationMesh = useMemo(() => {
@@ -374,7 +376,7 @@ export function Park(props) {
                 material={parkTreeMesh.material}
                 castShadow
                 receiveShadow
-                position={[0.35, 0.05, 0.35]}
+                position={treePosition}
                 />
         </BlockWrapper>
     )
@@ -387,13 +389,15 @@ function DollarSign({ isVisible, amount }) {
       config: { tension: 120, friction: 14 },
     });
 
+    const amountString = amount > 0 ? `$${amount}` : `-$${Math.abs(amount)}`
+
     return (
       <a.group position-y={animationProps.y} visible={isVisible}>
         <Html scaleFactor={20} center>
             <span
-                className={`font-3xl ${amount > 0 ? 'text-green-500' : 'text-red-500'} font-bold  ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+                className={`font-3xl ${amount > 0 ? 'bg-green-500' : 'bg-red-500'} text-white px-2 rounded-full font-bold  ${isVisible ? 'opacity-100' : 'opacity-0'}`}
             >
-                ${amount}
+                {amountString}
             </span>
         </Html>
       </a.group>

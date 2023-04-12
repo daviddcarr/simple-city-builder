@@ -180,6 +180,10 @@ function calculateSettings(block) {
                 floors: calculateProceduralHighrise(),
             }
             break
+        case "park":
+            return {
+                treePosition: [((Math.random() - 0.7) * 0.6), 0.05, ((Math.random() - 0.5) * 0.7)]
+            }
         default:
             return {}
     }
