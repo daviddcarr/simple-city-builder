@@ -12,6 +12,12 @@ export default function Highrise(props) {
 
     const { currencyPerPeriod, currencyPeriod } = getBlock('highrise')
 
+    const foundation = useGLTF('./glb/foundation.glb')
+
+    const foundationMesh = useMemo(() => {
+        return  foundation.nodes.FoundationConcrete
+    }, [foundation])
+
     const highriseGltfs = {
         "4": useGLTF('./glb/highrise_4.glb'),
         "4roof": useGLTF('./glb/highrise_4roof.glb'),
@@ -78,6 +84,12 @@ export default function Highrise(props) {
             currencyPeriod={currencyPeriod}
             >
 
+            <mesh
+                position={[0, 0, 0]}
+                receiveShadow
+                geometry={foundationMesh.geometry}
+                material={foundationMesh.material}
+                />
             {
                 towerBlocks.map((block, index) => (
                     <mesh
@@ -90,14 +102,6 @@ export default function Highrise(props) {
                         />
                 )) 
             }
-
-            <mesh
-                position={[0, 0.05, 0]}
-                receiveShadow
-                >
-                <boxGeometry args={[1, 0.1, 1]} />
-                <meshStandardMaterial color="darkgray" />
-            </mesh>
         </BlockWrapper>
     )
 }

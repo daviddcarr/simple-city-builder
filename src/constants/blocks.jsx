@@ -41,6 +41,13 @@ export const blocks = [
         currencyPerPeriod: -5,
         currencyPeriod: 60,
     },
+    {
+        name: 'highwayL',
+        title: 'Turn',
+        cost: 15,
+        currencyPerPeriod: -5,
+        currencyPeriod: 60,
+    },
 
 ]
 

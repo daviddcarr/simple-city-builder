@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import {
     useFrame,
     extend,
 } from 'react-three-fiber'
 import {
-    Html
+    Html,
+    useGLTF
 } from '@react-three/drei'
 import { useSpring, a } from '@react-spring/three'
 import { useGame } from '../hooks/useGame'
@@ -58,6 +59,8 @@ export function RenderBlock({block, yOffset}) {
                 return <Highway sides={3} position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
             case "highway3":
                 return <Highway sides={4} position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
+            case "highwayL":
+                return <Highway sides={"L"} position={blockPosition} rotation-y={block.blockRotation} incomeResetTime={block.incomeResetTime} />
             default:
                 return <PlacingBlock position={blockPosition} blockRotation={block.blockRotation} hovering />
         }
@@ -138,50 +141,155 @@ export function Highway(props) {
 
     const { currencyPerPeriod, currencyPeriod } = getBlock('highway')
 
+    const streets = {
+        street: useGLTF('./glb/street.glb'),
+        street3: useGLTF('./glb/street3.glb'),
+        street4: useGLTF('./glb/street4.glb'),
+        streetL: useGLTF('./glb/streetL.glb'),
+    }
+
+    const streetsMesh = useMemo(() => {
+        return {
+            street: {
+                road: streets.street.nodes.Street,
+                lamp0: streets.street.nodes.StreetLamp,
+                lamp1: streets.street.nodes.StreetLamp001,
+                lamp2: streets.street.nodes.StreetLamp002,
+                lamp3: streets.street.nodes.StreetLamp003,
+            },
+            street3: {
+                road: streets.street3.nodes.Street3,
+                lamp0: streets.street3.nodes.StreetLamp002,
+                lamp1: streets.street3.nodes.StreetLamp003,
+            },
+            street4: {
+                road: streets.street4.nodes.Street4,
+            },
+            streetL: {
+                road: streets.streetL.nodes.StreetL,
+                lamp0: streets.streetL.nodes.StreetLamp002,
+                lamp1: streets.streetL.nodes.StreetLamp003,
+                lamp2: streets.streetL.nodes.StreetLamp004,
+                lamp3: streets.streetL.nodes.StreetLamp005,
+            },
+        }
+    }, [streets])
+
     return (
         <BlockWrapper
             {...props}
             currencyPerPeriod={currencyPerPeriod}
             currencyPeriod={currencyPeriod}
             >
-            { sides >= 3 && 
-                <mesh
-                    position={[0.375, 0.15, 0]}
-                    rotation-y={Math.PI / 2}
-                    receiveShadow
+            { sides === 3 && 
+                <group>
+                    <mesh
+                        geometry={streetsMesh.street3.road.geometry}
+                        material={streetsMesh.street3.road.material}
+                        receiveShadow
+                        />
+                    <mesh
+                        geometry={streetsMesh.street3.lamp0.geometry}
+                        material={streetsMesh.street3.lamp0.material}
+                        castShadow
+                        position={[0.4, 0.05, 0.25]}
+                        rotation={[0, Math.PI, 0]}
+                        />
+                    <mesh
+                        geometry={streetsMesh.street3.lamp1.geometry}
+                        material={streetsMesh.street3.lamp1.material}
+                        castShadow
+                        position={[0.4, 0.05, -0.25]}
+                        rotation={[0, Math.PI, 0]}
+                        />
+                </group>
+                }
 
-                    >
-                    <boxGeometry args={[0.5, 0.1, 0.25]} />
-                    <meshStandardMaterial color="gray" />
-                </mesh>
+            { sides === 4 && 
+                <group>
+                    <mesh
+                        geometry={streetsMesh.street4.road.geometry}
+                        material={streetsMesh.street4.road.material}
+                        receiveShadow
+                        />
+                </group>
             }
 
-            { sides >= 4 && 
-                <mesh
-                    position={[-0.375, 0.15, 0]}
-                    rotation-y={Math.PI / 2}
-                    receiveShadow
-                    >
-                    <boxGeometry args={[0.5, 0.1, 0.25]} />
-                    <meshStandardMaterial color="gray" />
-                </mesh>
+            { sides === 2 &&
+                <group>
+                    <mesh
+                        geometry={streetsMesh.street.road.geometry}
+                        material={streetsMesh.street.road.material}
+                        receiveShadow
+                        />
+                    <mesh
+                        geometry={streetsMesh.street.lamp0.geometry}
+                        material={streetsMesh.street.lamp0.material}
+                        castShadow
+                        position={[0.4, 0.05, 0.25]}
+                        rotation={[0, Math.PI, 0]}
+                        />
+                    <mesh
+                        geometry={streetsMesh.street.lamp1.geometry}
+                        material={streetsMesh.street.lamp1.material}
+                        castShadow
+                        position={[0.4, 0.05, -0.25]}
+                        rotation={[0, Math.PI, 0]}
+                        />
+                    <mesh
+                        geometry={streetsMesh.street.lamp2.geometry}
+                        material={streetsMesh.street.lamp2.material}
+                        castShadow
+                        position={[-0.4, 0.05, -0.25]}
+                        />
+                    <mesh
+                        geometry={streetsMesh.street.lamp3.geometry}
+                        material={streetsMesh.street.lamp3.material}
+                        castShadow
+                        position={[-0.4, 0.05, 0.25]}
+                        />
+                </group>
             }
 
-            <mesh
-                position={[0, 0.15, 0]}
-                receiveShadow
-                >
-                <boxGeometry args={[0.5, 0.1, 1]} />
-                <meshStandardMaterial color="gray" />
-            </mesh>
+            { sides === "L" && 
+                <group>
+                    <mesh
+                        geometry={streetsMesh.streetL.road.geometry}
+                        material={streetsMesh.streetL.road.material}
+                        receiveShadow
+                        />
+                    <mesh
+                        geometry={streetsMesh.streetL.lamp0.geometry}
+                        material={streetsMesh.streetL.lamp0.material}
+                        castShadow
+                        position={[0.4, 0.05, 0.25]}
+                        rotation={[0, Math.PI, 0]}
+                        />
+                    <mesh
 
-            <mesh
-                position={[0, 0.05, 0]}
-                receiveShadow
-                >
-                <boxGeometry args={[1, 0.1, 1]} />
-                <meshStandardMaterial color="darkgray" />
-            </mesh>
+                        geometry={streetsMesh.streetL.lamp1.geometry}
+                        material={streetsMesh.streetL.lamp1.material}
+                        castShadow
+                        position={[0.4, 0.05, -0.25]}
+                        rotation={[0, Math.PI, 0]}
+                        />
+                    <mesh
+
+                        geometry={streetsMesh.streetL.lamp2.geometry}
+                        material={streetsMesh.streetL.lamp2.material}
+                        castShadow
+                        position={[-0.25, 0.05, 0.4]}
+                        rotation={[0, Math.PI/2, 0]}
+                        />
+                    <mesh
+                        geometry={streetsMesh.streetL.lamp3.geometry}
+                        material={streetsMesh.streetL.lamp3.material}
+                        castShadow
+                        position={[0.25, 0.05, 0.4]}
+                        rotation={[0, Math.PI/2, 0]}
+                        />
+                </group>
+            }
         </BlockWrapper>
     )
 }
@@ -238,6 +346,18 @@ export function Park(props) {
 
     const { currencyPerPeriod, currencyPeriod } = getBlock('park')
 
+    const parkFoundation = useGLTF('./glb/foundationGrass.glb')
+
+    const parkFoundationMesh = useMemo(() => {
+        return parkFoundation.nodes.FoundationGrass
+    }, [parkFoundation])
+
+    const parkTree = useGLTF('./glb/tree.glb')
+
+    const parkTreeMesh = useMemo(() => {
+        return parkTree.nodes.Tree
+    }, [parkTree])
+
     return (
         <BlockWrapper
             {...props}
@@ -245,12 +365,17 @@ export function Park(props) {
             currencyPeriod={currencyPeriod}
             >
             <mesh
-                position={[0, 0.05, 0]}
+                geometry={parkFoundationMesh.geometry}
+                material={parkFoundationMesh.material}
                 receiveShadow
-                >
-                <boxGeometry args={[1, 0.1, 1]} />
-                <meshStandardMaterial color="darkgreen" />
-            </mesh>
+                />
+            <mesh
+                geometry={parkTreeMesh.geometry}
+                material={parkTreeMesh.material}
+                castShadow
+                receiveShadow
+                position={[0.35, 0.05, 0.35]}
+                />
         </BlockWrapper>
     )
 }
