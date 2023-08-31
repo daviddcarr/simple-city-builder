@@ -151,7 +151,7 @@ function App() {
               shadow-camera-left={-20}
               />
             <Environment 
-              preset="park" 
+              files={"park_parking_2k.hdr"}
               />
             { enableEffects &&
               <EffectComposer>
